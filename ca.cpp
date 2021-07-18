@@ -68,20 +68,17 @@ auto compute_chunk(vector<vector<int>> &old_board, vector<vector<int>> &new_boar
     return;
 }
 
-auto test_func(int x){
-    cout<<x;
-}
-
-vector<vector<int>> run_in_parallel(vector<vector<int>> init_board, int num_row_threads=2, \
-    int num_col_threads=2, int num_iters=100, int radius=1){
-    
+vector<vector<int>> run_in_parallel(vector<vector<int>> init_board, int num_row_threads=2, int num_col_threads=2, int num_iters=100, int radius=1){
     auto start = std::chrono::system_clock::now();
     pair<int, int> size(init_board.size(), init_board[0].size());
     vector<vector<int>> even_board = init_board;
     vector<vector<int>> odd_board = init_board;
 
+    // cout<<size.first << " " << num_row_threads << size.second << " "<< num_col_threads;
+
     int w_chunk_size = size.first/num_row_threads;
     int h_chunk_size = size.second/num_col_threads;
+
 
     vector<vector<pair<int, int>>> top_lefts(num_row_threads, vector<pair<int, int>>(num_col_threads));
     vector<vector<pair<int, int>>> bottom_rights(num_row_threads, vector<pair<int, int>>(num_col_threads));
@@ -104,16 +101,23 @@ vector<vector<int>> run_in_parallel(vector<vector<int>> init_board, int num_row_
 
     }
     
-    // vector<vector<thread>> tids(num_row_threads, vector<thread>(num_col_threads));
-    vector<thread> tids;
-
     for(int iter=0; iter<num_iters; iter++){
+        vector<thread> tids;
         for(int i=0; i<num_row_threads; i++){
             for(int j=0; j<num_col_threads; j++){
-                if(iter % 2 == 0)
-                    tids.push_back(thread(compute_chunk, &even_board, &odd_board, top_lefts[i][j], bottom_rights[i][j], 1));
-                else
-                    tids.push_back(thread(compute_chunk, &odd_board, &even_board, top_lefts[i][j], bottom_rights[i][j], 1));
+                if(iter % 2 == 0){
+                    auto chunk_func = [&even_board, &odd_board](pair<int, int> tl, pair<int, int> br) {
+                        return compute_chunk(even_board, odd_board, tl, br, 1);
+                    };
+                    tids.push_back(thread(chunk_func, top_lefts[i][j], bottom_rights[i][j]));
+                }
+                else{
+                    auto chunk_func = [&even_board, &odd_board](pair<int, int> tl, pair<int, int> br) {
+                        return compute_chunk(odd_board, even_board, tl, br, 1);
+                    };
+
+                    tids.push_back(thread(chunk_func, top_lefts[i][j], bottom_rights[i][j]));
+                }
             }
         }
         for(thread& t: tids) t.join();
@@ -144,9 +148,9 @@ int main() {
         cout<<"Done!\n";
     }
 
-    // write_matrix(board);
+    write_matrix(board);
 
-    // vector<vector<int>> seq_result = run_sequentially(board, 5);
+    vector<vector<int>> seq_result = run_sequentially(board, 5);
     vector<vector<int>> par_result = run_in_parallel(board, 2, 2, 5);
 
     // cout<<"--------------\n";
