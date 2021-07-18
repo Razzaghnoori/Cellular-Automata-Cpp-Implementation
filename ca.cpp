@@ -48,7 +48,9 @@ vector<vector<int>> run_sequentially(vector<vector<int>> init_board, int num_ite
                         extract_matrix(init_board, center, radius)
                     );
                 }
+                cout<<"[]";
             }
+            cout<<"\n";
             init_board = board;
         }
         auto elapsed = std::chrono::system_clock::now() - start;
