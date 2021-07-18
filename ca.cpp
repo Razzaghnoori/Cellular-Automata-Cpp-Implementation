@@ -123,6 +123,10 @@ vector<vector<int>> run_in_parallel(vector<vector<int>> init_board, int num_row_
         for(thread& t: tids) t.join();
     }
 
+    auto elapsed = std::chrono::system_clock::now() - start;
+    auto musec = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+    cout<<"Parallel task took " << musec << " to finish.\n";
+
     if(num_iters%2 == 0) return even_board;
     else return odd_board;
 }
@@ -145,21 +149,19 @@ int main() {
         board = read_matrix(board);
     } else {
         fill_matrix_randomly(board);
-        cout<<"Done!\n";
+        cout<<"Matrix filled with random values!\n";
     }
 
-    write_matrix(board);
-
-    vector<vector<int>> seq_result = run_sequentially(board, 5);
-    vector<vector<int>> par_result = run_in_parallel(board, 2, 2, 5);
+    vector<vector<int>> seq_result = run_sequentially(board, 53);
+    vector<vector<int>> par_result = run_in_parallel(board, 2, 2, 53);
 
     // cout<<"--------------\n";
     // write_matrix(seq_result);
 
-    cout<<"--------------\n";
-    write_matrix(par_result);
+    // cout<<"--------------\n";
+    // write_matrix(par_result);
 
-    // cout << "Parallel and sequential outputs are " << (check_matrix_equality(seq_result, par_result) ? "" : "NOT ") << "equal.\n";
+    cout << "Parallel and sequential outputs are " << (check_matrix_equality(seq_result, par_result) ? "" : "NOT ") << "equal.\n";
 
     return(0);
 }
