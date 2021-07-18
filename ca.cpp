@@ -152,8 +152,15 @@ int main() {
         cout<<"Matrix filled with random values!\n";
     }
 
-    vector<vector<int>> seq_result = run_sequentially(board, 53);
-    vector<vector<int>> par_result = run_in_parallel(board, 2, 2, 53);
+    int num_row_threads, num_col_threads, num_iters;
+    cout << "How many threads do you need on rows and columns respectively? \n> ";
+    cin >> num_row_threads >> num_col_threads;
+
+    cout << "Finally, how many iteration should it run for?\n> ";
+    cin >> num_iters;
+
+    vector<vector<int>> seq_result = run_sequentially(board, num_iters);
+    vector<vector<int>> par_result = run_in_parallel(board, num_row_threads, num_col_threads, num_iters);
 
     // cout<<"--------------\n";
     // write_matrix(seq_result);
