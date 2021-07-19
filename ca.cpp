@@ -17,6 +17,9 @@ using namespace ff;
 
 vector<vector<int>> run_in_parallel_omp(vector<vector<int>> init_board, int num_row_threads=2, int num_col_threads=2, int num_iters=100, int radius=1)
     {
+        // Didn't work. Output different from that of the sequential one.
+        // Deprecated. 
+        
         auto start = std::chrono::system_clock::now();
         pair<int, int> size(init_board.size(), init_board[0].size());
         vector<vector<int>> board = init_board;
@@ -41,7 +44,7 @@ vector<vector<int>> run_in_parallel_omp(vector<vector<int>> init_board, int num_
 
 vector<vector<int>> run_sequentially(vector<vector<int>> init_board, int num_iters=100, int radius=1)
     {
-        auto start = std::chrono::system_clock::now();
+        utimer timer("Sequential task");
         pair<int, int> size(init_board.size(), init_board[0].size());
         vector<vector<int>> board = init_board;
         for(int iter=0; iter<num_iters; iter++){
@@ -55,9 +58,7 @@ vector<vector<int>> run_sequentially(vector<vector<int>> init_board, int num_ite
             }
             init_board = board;
         }
-        auto elapsed = std::chrono::system_clock::now() - start;
-        auto musec = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
-        cout<<"Sequential task took " << musec << " microsecond to finish.\n";
+
         return(init_board);
     }
 
@@ -73,7 +74,7 @@ auto compute_chunk(vector<vector<int>> &old_board, vector<vector<int>> &new_boar
 }
 
 vector<vector<int>> run_in_parallel(vector<vector<int>> init_board, int num_row_threads=2, int num_col_threads=2, int num_iters=100, int radius=1){
-    utimer u("Parallel task");
+    utimer timer("Parallel task");
     pair<int, int> size(init_board.size(), init_board[0].size());
     vector<vector<int>> even_board = init_board;
     vector<vector<int>> odd_board = init_board;

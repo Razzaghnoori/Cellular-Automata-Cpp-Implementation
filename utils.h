@@ -12,7 +12,7 @@ int remainder(int x, int y){
     return(x%y);
 }
 
-void write_matrix(vector<vector<int>> mat) {
+void write_matrix(vector<vector<int>> &mat) {
     int m = mat.size();
     int n = mat[0].size();
     for(int i=0; i<m; i++){
@@ -35,7 +35,7 @@ vector<vector<int>> read_matrix(vector<vector<int>> &board){
     return(board);
 }
 
-vector<vector<int>> extract_matrix(vector<vector<int>> mat, pair<int, int> top_left, \
+vector<vector<int>> extract_matrix(vector<vector<int>> &mat, pair<int, int> top_left, \
     int n_rows, int n_cols) {
         // Slices matrix starting from the top_left taking n_rows rows and n_cols columns.
         int mat_n_rows = mat.size();
@@ -53,7 +53,7 @@ vector<vector<int>> extract_matrix(vector<vector<int>> mat, pair<int, int> top_l
         return(out);
 }
 
-vector<vector<int>> extract_matrix(vector<vector<int>> mat, pair<int, int> center, int radius) {
+vector<vector<int>> extract_matrix(vector<vector<int>> &mat, pair<int, int> center, int radius) {
     pair<int, int> mat_size(mat.size(), mat[0].size());
 
     pair<int, int> top_left(remainder(center.first - radius, mat_size.first),
@@ -73,7 +73,7 @@ int count_in_matrix(vector<vector<int>> mat, int state){
     return(count);
 }
 
-bool check_matrix_equality(vector<vector<int>> A, vector<vector<int>> B){
+bool check_matrix_equality(vector<vector<int>> &A, vector<vector<int>> &B){
     if(A.size() != B.size() || A[0].size() != B[0].size()) return false;
 
     for(int i=0; i<A.size(); i++){
