@@ -142,14 +142,19 @@ int cli_main(int argc, char *argv[]){
     float eff_ff = sp_ff / (num_row_threads * num_col_threads);
 
 
-    float csv_row[] = {board_w, board_h, num_row_threads, num_col_threads, num_iters, \
-                        seq_time, par_time, ff_par_time, sp_par, sp_ff, sc_par, sc_ff, eff_par, eff_ff};
-    int row_len = sizeof(csv_row)/sizeof(csv_row[0]);
+    int csv_row_setup[] = {board_w, board_h, num_row_threads, num_col_threads, num_iters};
+    float csv_row_results[] = {seq_time, par_time, ff_par_time, sp_par, sp_ff, sc_par, sc_ff, eff_par, eff_ff};
+    int row_setup_len = sizeof(csv_row_setup)/sizeof(csv_row_setup[0]);
+    int row_result_len = sizeof(csv_row_results)/sizeof(csv_row_results[0]);
+    
     char delim[] = ", ";
 
-    for(int i=0; i<row_len; i++){
-        cout<<csv_row[i];
-        if(i+1 == row_len) cout<<"\n";
+    for(int i=0; i<row_setup_len; i++){
+        cout<<csv_row_setup[i] << delim;
+    }
+    for(int i=0; i<row_result_len; i++){
+        cout<<csv_row_results[i];
+        if(i+1 == row_result_len) cout<<"\n";
         else cout<<delim;
     }
 
