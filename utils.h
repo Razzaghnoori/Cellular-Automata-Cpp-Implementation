@@ -23,7 +23,7 @@ void write_matrix(vector<vector<int>> &mat) {
     }
 }
 
-vector<vector<int>> read_matrix(vector<vector<int>> &board){
+void read_matrix(vector<vector<int>> &board){
     int n_rows = board.size();
     int n_cols = board[0].size();
 
@@ -32,7 +32,6 @@ vector<vector<int>> read_matrix(vector<vector<int>> &board){
             cin >> board[i][j];
         }
     }
-    return(board);
 }
 
 vector<vector<int>> extract_matrix(vector<vector<int>> &mat, pair<int, int> top_left, \
