@@ -126,17 +126,17 @@ int cli_main(int argc, char *argv[]){
     par_1_time /= num_reps;
     ff_par_1_time /= num_reps;
 
-    double sp_par = seq_time / par_time;
-    double sp_ff = seq_time / ff_par_time;
+    float sp_par = seq_time / par_time;
+    float sp_ff = seq_time / ff_par_time;
 
-    double sc_par = par_1_time / par_time;
-    double sc_ff = ff_par_1_time / ff_par_time;
+    float sc_par = par_1_time / par_time;
+    float sc_ff = ff_par_1_time / ff_par_time;
 
-    double eff_par = sp_par / (num_row_threads * num_col_threads);
-    double eff_ff = sp_ff / (num_row_threads * num_col_threads);
+    float eff_par = sp_par / (num_row_threads * num_col_threads);
+    float eff_ff = sp_ff / (num_row_threads * num_col_threads);
 
 
-    double csv_row[] = {board_w, board_h, num_row_threads, num_col_threads, num_iters, \
+    float csv_row[] = {board_w, board_h, num_row_threads, num_col_threads, num_iters, \
                         seq_time, par_time, ff_par_time, sp_par, sp_ff, sc_par, sc_ff, eff_par, eff_ff};
     int row_len = sizeof(csv_row)/sizeof(csv_row[0]);
     char delim[] = ", ";
