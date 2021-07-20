@@ -99,7 +99,7 @@ int cli_main(int argc, char *argv[]){
 
     fill_rand ? fill_matrix_randomly(board) : read_matrix(board);
 
-    float seq_time, par_time, ff_par_time, par_1_time, ff_par_1_time = 0;
+    long long seq_time, par_time, ff_par_time, par_1_time, ff_par_1_time = 0;
 
 
     for(int rep=0; rep<num_reps; rep++){
@@ -126,14 +126,14 @@ int cli_main(int argc, char *argv[]){
     par_1_time /= num_reps;
     ff_par_1_time /= num_reps;
 
-    float sp_par = seq_time / par_time;
-    float sp_ff = seq_time / ff_par_time;
+    double sp_par = seq_time / par_time;
+    double sp_ff = seq_time / ff_par_time;
 
-    float sc_par = par_1_time / par_time;
-    float sc_ff = ff_par_1_time / ff_par_time;
+    double sc_par = par_1_time / par_time;
+    double sc_ff = ff_par_1_time / ff_par_time;
 
-    float eff_par = sp_par / (num_row_threads * num_col_threads);
-    float eff_ff = sp_ff / (num_row_threads * num_col_threads);
+    double eff_par = sp_par / (num_row_threads * num_col_threads);
+    double eff_ff = sp_ff / (num_row_threads * num_col_threads);
 
 
     double csv_row[] = {board_w, board_h, num_row_threads, num_col_threads, num_iters, \
