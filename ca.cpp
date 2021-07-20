@@ -141,9 +141,8 @@ int cli_main(int argc, char *argv[]){
     float eff_par = sp_par / (num_row_threads * num_col_threads);
     float eff_ff = sp_ff / (num_row_threads * num_col_threads);
 
-
-    int csv_row_setup[] = {board_w, board_h, num_row_threads, num_col_threads, num_iters};
-    float csv_row_results[] = {seq_time, par_time, ff_par_time, sp_par, sp_ff, sc_par, sc_ff, eff_par, eff_ff};
+    long csv_row_setup[] = {board_w, board_h, num_row_threads, num_col_threads, num_iters, seq_time, par_time, ff_par_time};
+    float csv_row_results[] = {sp_par, sp_ff, sc_par, sc_ff, eff_par, eff_ff};
     int row_setup_len = sizeof(csv_row_setup)/sizeof(csv_row_setup[0]);
     int row_result_len = sizeof(csv_row_results)/sizeof(csv_row_results[0]);
     
