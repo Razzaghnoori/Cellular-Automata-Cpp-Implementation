@@ -99,7 +99,7 @@ int cli_main(int argc, char *argv[]){
 
     fill_rand ? fill_matrix_randomly(board) : read_matrix(board);
 
-    long long seq_time, par_time, ff_par_time, par_1_time, ff_par_1_time;
+    double seq_time, par_time, ff_par_time, par_1_time, ff_par_1_time;
 
     seq_time = 0;
     par_time = 0;
