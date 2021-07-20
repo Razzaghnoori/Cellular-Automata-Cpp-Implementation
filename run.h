@@ -108,10 +108,12 @@ pair<vector<vector<int>>, long long> run_in_parallel(vector<vector<int>> init_bo
     else return make_pair(odd_board, duration);
 }
 
+
 pair<vector<vector<int>>, long long> run_in_parallel_ff(vector<vector<int>> init_board, int num_row_threads=2, \
     int num_col_threads=2, int num_iters=100, int radius=1){
 
-    auto start = std::chrono::system_clock::now();
+    // auto start = std::chrono::system_clock::now();
+    ffTime(START_TIME);
 
     pair<int, int> size(init_board.size(), init_board[0].size());
     vector<vector<int>> even_board = init_board;
@@ -143,8 +145,12 @@ pair<vector<vector<int>>, long long> run_in_parallel_ff(vector<vector<int>> init
         }, num_row_threads * num_col_threads);
     }
 
-    auto elapsed = std::chrono::system_clock::now() - start;
-    long long duration = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+    // auto elapsed = std::chrono::system_clock::now() - start;
+    // long long duration = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+
+    ffTime(STOP_TIME);
+
+    long long duration = ffTime(GET_TIME) * 1000;  // Couldn't find anything in FastFlow to report time in usec.
 
     return (num_iters%2 == 0 ? make_pair(even_board, duration) : make_pair(odd_board, duration));
 }
