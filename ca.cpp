@@ -27,7 +27,10 @@ int interactive_main()
     }
     else
     {
-        fill_matrix_randomly(board);
+        int num_states;
+        cout << "\nHow many states should each cell have?\n> ";
+        cin >> num_states;
+        fill_matrix_randomly(board, num_states);
         cout << "Matrix filled with random values!\n";
     }
 
@@ -73,7 +76,7 @@ int interactive_main()
 }
 
 void get_shell_params(int argc, char *argv[], int &board_w, int &board_h, int &num_row_threads, \
-    int &num_col_threads, int &num_iters, int &num_repetitions, bool &fill_randomly){
+    int &num_col_threads, int &num_iters, int &num_repetitions, int &num_states, bool &fill_randomly){
     for(int i=0; i<argc; i++){
         if(strcmp(argv[i], "-w") == 0) board_w = atoi(argv[i+1]);
         if(strcmp(argv[i], "-h") == 0) board_h = atoi(argv[i+1]);
@@ -81,6 +84,7 @@ void get_shell_params(int argc, char *argv[], int &board_w, int &board_h, int &n
         if(strcmp(argv[i], "-c") == 0) num_col_threads = atoi(argv[i+1]);
         if(strcmp(argv[i], "-i") == 0) num_iters = atoi(argv[i+1]);
         if(strcmp(argv[i], "-I") == 0) num_repetitions = atoi(argv[i+1]);
+        if(strcmp(argv[i], "-s") == 0) num_states = atoi(argv[i+1]);
 
         if(strcmp(argv[i], "--rand") == 0) fill_randomly = true;
     }
@@ -88,16 +92,16 @@ void get_shell_params(int argc, char *argv[], int &board_w, int &board_h, int &n
 
 
 int cli_main(int argc, char *argv[]){
-    int board_w, board_h, num_row_threads, num_col_threads, num_iters;
+    int board_w, board_h, num_row_threads, num_col_threads, num_iters, num_states;
     int num_reps=1;
     bool fill_rand = false;
 
     get_shell_params(argc, argv, board_w, board_h, num_row_threads, \
-        num_col_threads, num_iters, num_reps, fill_rand);
+        num_col_threads, num_iters, num_reps, num_states, fill_rand);
 
     vector<vector<int>> board(board_w, vector<int>(board_h));
 
-    fill_rand ? fill_matrix_randomly(board) : read_matrix(board);
+    fill_rand ? fill_matrix_randomly(board, num_states) : read_matrix(board);
 
     double seq_time, par_time, ff_par_time, par_1_time, ff_par_1_time;
 

@@ -83,8 +83,8 @@ bool check_matrix_equality(vector<vector<int>> &A, vector<vector<int>> &B){
     return true;
 }
 
-void fill_matrix_randomly(vector<vector<int>> &A){
+void fill_matrix_randomly(vector<vector<int>> &A, int num_states=2){
     for(int i=0; i< A.size(); i++)
         for(int j=0; j<A[0].size(); j++)
-            A[i][j] = rand()%2;
+            A[i][j] = rand()%num_states;
 }

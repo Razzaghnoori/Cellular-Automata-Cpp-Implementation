@@ -13,8 +13,3 @@ for l in ${LEN[@]}; do
         done
     done
 done
-
-
-# for l in ${LEN[@]}; do
-#     ./ca -w $l -h $l -i 2 -r 2 -c 2 --rand >> $1
-# done
