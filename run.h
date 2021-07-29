@@ -113,27 +113,16 @@ pair<vector<vector<int>>, double> run_in_parallel_ff(vector<vector<int>> init_bo
     int num_col_threads=2, int num_iters=100, int radius=1){
 
     // auto start = std::chrono::system_clock::now();
-    ffTime(START_TIME);
 
     pair<int, int> size(init_board.size(), init_board[0].size());
     vector<vector<int>> even_board = init_board;
     vector<vector<int>> odd_board = init_board;
 
-    ParallelFor outter_pf;
-    // ParallelFor inner_pf;
+    ParallelFor pf;
 
-
+    ffTime(START_TIME);
     for(int iter=0; iter < num_iters; iter++){
-        outter_pf.parallel_for(0, size.first, [&](int i){
-#if 0
-            outter_pf.parallel_for(0, size.second, [&](int j){
-                if(iter%2 == 0){
-                    odd_board[i][j] = rules_func(extract_matrix(even_board, make_pair(i, j), radius));
-                } else{
-                    even_board[i][j] = rules_func(extract_matrix(odd_board, make_pair(i, j), radius));
-                }
-            }, num_col_threads);
-#else
+        pf.parallel_for(0, size.first, [&](int i){
             for(int j=0; j<size.second; j++){
                 if(iter%2 == 0){
                     odd_board[i][j] = rules_func(extract_matrix(even_board, make_pair(i, j), radius));
@@ -141,7 +130,6 @@ pair<vector<vector<int>>, double> run_in_parallel_ff(vector<vector<int>> init_bo
                     even_board[i][j] = rules_func(extract_matrix(odd_board, make_pair(i, j), radius));
                 }
             }
-#endif
         }, num_row_threads * num_col_threads);
     }
 
