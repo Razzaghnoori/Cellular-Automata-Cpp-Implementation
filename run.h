@@ -14,12 +14,14 @@
 using namespace std;
 using namespace ff;
 
-pair<vector<vector<int>>, double> run_sequentially(vector<vector<int>> init_board, int num_iters=100, int radius=1)
-    {
+pair<vector<vector<int>>, double> run_sequentially(vector<vector<int>> init_board, int num_iters=100, int radius=1, bool verbose=false)
+{
         auto start = std::chrono::system_clock::now();
         pair<int, int> size(init_board.size(), init_board[0].size());
         vector<vector<int>> board = init_board;
         for(int iter=0; iter<num_iters; iter++){
+            auto iter_start = std::chrono::system_clock::now();
+
             for(int i=0; i<size.first; i++){
                 for(int j=0; j<size.second; j++){
                     pair<int, int> center(i, j);
@@ -29,12 +31,18 @@ pair<vector<vector<int>>, double> run_sequentially(vector<vector<int>> init_boar
                 }
             }
             init_board = board;
+
+            if(verbose == true){
+                auto iter_elapsed = std::chrono::system_clock::now() - iter_start;
+                double iter_duration = std::chrono::duration_cast<std::chrono::microseconds>(iter_elapsed).count();
+                cout<<"\n\t\tIteration "<<iter<<" Took "<<iter_duration<<" microseconds to complete.\n";
+            }
         }
         auto elapsed = std::chrono::system_clock::now() - start;
         double duration = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
         
         return make_pair(init_board, duration);
-    }
+}
 
 auto compute_chunk(vector<vector<int>> &old_board, vector<vector<int>> &new_board, \
     int first_row, int last_row, int radius=1){
@@ -49,7 +57,7 @@ auto compute_chunk(vector<vector<int>> &old_board, vector<vector<int>> &new_boar
 }
 
 pair<vector<vector<int>>, double> run_in_parallel(vector<vector<int>> init_board, int num_threads=2, \
-    int num_iters=100, int radius=1){
+    int num_iters=100, int radius=1, bool verbose=false){
     pair<int, int> size(init_board.size(), init_board[0].size());
     vector<vector<int>> even_board = init_board;
     vector<vector<int>> odd_board = init_board;
@@ -63,6 +71,7 @@ pair<vector<vector<int>>, double> run_in_parallel(vector<vector<int>> init_board
             make_pair(chunk_size * i, chunk_size * (i+1)));
 
     for(int iter=0; iter<num_iters; iter++){
+        auto iter_start = std::chrono::system_clock::now();
         vector<thread> tids;
         for(int i=0; i<num_threads; i++){
             if(iter % 2 == 0){
@@ -75,10 +84,14 @@ pair<vector<vector<int>>, double> run_in_parallel(vector<vector<int>> init_board
                     return compute_chunk(even_board, odd_board, first_row, last_row);
                 };
                 tids.push_back(thread(chunk_func, ranges[i].first, ranges[i].second));
-            }
-            
+            } 
         }
-        for(thread& t: tids) t.join();
+        for(thread& t: tids) t.join();        
+        if(verbose == true){
+            auto iter_elapsed = std::chrono::system_clock::now() - iter_start;
+            double iter_duration = std::chrono::duration_cast<std::chrono::microseconds>(iter_elapsed).count();
+            cout<<"\n\t\tIteration "<<iter<<" Took "<<iter_duration<<" microseconds to complete.\n";
+        }
     }
 
     auto elapsed = std::chrono::system_clock::now() - start;
@@ -87,7 +100,6 @@ pair<vector<vector<int>>, double> run_in_parallel(vector<vector<int>> init_board
     if(num_iters%2 == 0) return make_pair(even_board, duration);
     else return make_pair(odd_board, duration);
 }
-
 
 pair<vector<vector<int>>, double> run_in_parallel_ff(vector<vector<int>> init_board, int num_threads=2, \
     int num_iters=100, int radius=1, bool verbose=false){
@@ -98,10 +110,17 @@ pair<vector<vector<int>>, double> run_in_parallel_ff(vector<vector<int>> init_bo
 
     auto init_start = std::chrono::system_clock::now();
 
-    ParallelFor pf;
+    // Initializing without num_threads here destroys the performance
+    ParallelFor pf(num_threads);
+
+    auto init_elapsed = chrono::system_clock::now() - init_start;
+    double init_duration = chrono::duration_cast<std::chrono::microseconds>(init_elapsed).count();
+
+    if(verbose == true) cout <<"\nFastFlow Parallel For instantiation took: "<<init_duration <<" microseconds\n";
 
     ffTime(START_TIME);
     for(int iter=0; iter < num_iters; iter++){
+        auto iter_start = std::chrono::system_clock::now();
         pf.parallel_for(0, size.first, [&](int i){
             for(int j=0; j<size.second; j++){
                 if(iter%2 == 0){
@@ -111,19 +130,18 @@ pair<vector<vector<int>>, double> run_in_parallel_ff(vector<vector<int>> init_bo
                 }
             }
         }, num_threads);
+        
+        if(verbose){
+            auto iter_elapsed = std::chrono::system_clock::now() - iter_start;
+            double iter_duration = std::chrono::duration_cast<std::chrono::microseconds>(iter_elapsed).count();
+            cout<<"\n\t\tIteration "<<iter<<" Took "<<iter_duration<<" microseconds to complete.\n";
+        }
     }
 
     // auto elapsed = std::chrono::system_clock::now() - start;
     // double duration = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
 
     ffTime(STOP_TIME);
-
-
-    auto init_elapsed = chrono::system_clock::now() - init_start;
-    double init_duration = chrono::duration_cast<std::chrono::microseconds>(init_elapsed).count();
-
-    if(verbose == true) cout <<"\nFastFlow Parallel For instantiation took: "<<init_duration <<" microseconds\n";
-
 
     double duration = ffTime(GET_TIME) * 1000;  // Couldn't find anything in FastFlow to report time in usec.
 

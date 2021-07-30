@@ -109,13 +109,13 @@ int cli_main(int argc, char *argv[]){
 
 
     for(int rep=0; rep<num_reps; rep++){
-        auto seq_result = run_sequentially(board, num_iters, 1);
-        auto par_result = run_in_parallel(board, num_row_threads, num_iters);
+        auto seq_result = run_sequentially(board, num_iters, 1, verbose);
+        auto par_result = run_in_parallel(board, num_row_threads, num_iters, 1, verbose);
         auto ff_par_result = run_in_parallel_ff(board, num_row_threads, num_iters, 1, verbose);
 
         // We need two extra results to compute scalability.
-        auto par_1_result = run_in_parallel(board, 1, num_iters);
-        auto ff_par_1_result = run_in_parallel_ff(board, 1, num_iters);
+        auto par_1_result = run_in_parallel(board, 1, num_iters, 1, verbose);
+        auto ff_par_1_result = run_in_parallel_ff(board, 1, num_iters, 1, verbose);
 
 
         seq_time += seq_result.second;

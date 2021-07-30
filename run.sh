@@ -2,7 +2,7 @@
 
 LEN=(100 300 1000)
 N_THR=(2 4 8 16 32 64 128)
-N_ITR=(2 4 6)
+N_ITR=(5)
 
 echo "Board Width, Board Height, N. Row Threads, N. Col Threads, N. Iters, Seq Time, Par Time, FF Time, Par Speed Up, FF Speed Up, Par Scalability, FF Scalability, Par Efficiency, FF Efficiency" > $1
 
