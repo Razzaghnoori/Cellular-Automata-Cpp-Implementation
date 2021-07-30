@@ -118,9 +118,10 @@ pair<vector<vector<int>>, double> run_in_parallel_ff(vector<vector<int>> init_bo
     vector<vector<int>> even_board = init_board;
     vector<vector<int>> odd_board = init_board;
 
-    ParallelFor pf;
-
     ffTime(START_TIME);
+
+    ParallelFor pf(num_row_threads * num_col_threads);
+
     for(int iter=0; iter < num_iters; iter++){
         pf.parallel_for(0, size.first, [&](int i){
             for(int j=0; j<size.second; j++){
