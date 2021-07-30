@@ -37,66 +37,46 @@ pair<vector<vector<int>>, double> run_sequentially(vector<vector<int>> init_boar
     }
 
 auto compute_chunk(vector<vector<int>> &old_board, vector<vector<int>> &new_board, \
-    pair<int, int> top_left, pair<int, int> bottom_right, int radius){
-    for(int i=top_left.first; i<bottom_right.first; i++){
-        for(int j=top_left.second; j<bottom_right.second; j++){
-                pair<int, int> center(i, j);
-                new_board[i][j] = rules_func(extract_matrix(old_board, center, radius));
+    int first_row, int last_row, int radius=1){
+    pair<int, int> size(old_board.size(), old_board[0].size());
+    for(int i=first_row; i<last_row; i++){
+        for(int j=0; j<size.second; j++){
+            pair<int, int> center(i, j);
+            new_board[i][j] = rules_func(extract_matrix(old_board, center, radius));
         }
     }
     return;
 }
 
-pair<vector<vector<int>>, double> run_in_parallel(vector<vector<int>> init_board, int num_row_threads=2, int num_col_threads=2, \
+pair<vector<vector<int>>, double> run_in_parallel(vector<vector<int>> init_board, int num_threads=2, \
     int num_iters=100, int radius=1){
-    auto start = std::chrono::system_clock::now();
     pair<int, int> size(init_board.size(), init_board[0].size());
     vector<vector<int>> even_board = init_board;
     vector<vector<int>> odd_board = init_board;
 
-    int w_chunk_size = size.first/num_row_threads;
-    int h_chunk_size = size.second/num_col_threads;
+    auto start = std::chrono::system_clock::now();
+    int chunk_size = size.first/num_threads;
+    pair<int, int> ranges[num_threads];
+    for(int i=0; i<num_threads; i++)
+        ranges[i] = ((i+1)==num_threads ? \
+            make_pair(chunk_size * i, size.first) : \
+            make_pair(chunk_size * i, chunk_size * (i+1)));
 
-
-    vector<vector<pair<int, int>>> top_lefts(num_row_threads, vector<pair<int, int>>(num_col_threads));
-    vector<vector<pair<int, int>>> bottom_rights(num_row_threads, vector<pair<int, int>>(num_col_threads));
-
-    for(int i=0; i<num_row_threads; i++){
-        for(int j=0; j<num_col_threads; j++){
-            pair<int, int> top_left(w_chunk_size * i, h_chunk_size * j);
-
-            int br_x, br_y;  // br stands for bottom right
-            if(i == num_row_threads -1) br_x = size.first;
-            else br_x = w_chunk_size * (i+1);
-            if(j == num_col_threads -1) br_y = size.second;
-            else br_y = h_chunk_size * (j+1);
-
-            pair<int, int> bottom_right(br_x, br_y);
-
-            top_lefts[i][j] = top_left;
-            bottom_rights[i][j] = bottom_right;
-        }
-
-    }
-    
     for(int iter=0; iter<num_iters; iter++){
         vector<thread> tids;
-        for(int i=0; i<num_row_threads; i++){
-            for(int j=0; j<num_col_threads; j++){
-                if(iter % 2 == 0){
-                    auto chunk_func = [&even_board, &odd_board](pair<int, int> tl, pair<int, int> br) {
-                        return compute_chunk(even_board, odd_board, tl, br, 1);
-                    };
-                    tids.push_back(thread(chunk_func, top_lefts[i][j], bottom_rights[i][j]));
-                }
-                else{
-                    auto chunk_func = [&even_board, &odd_board](pair<int, int> tl, pair<int, int> br) {
-                        return compute_chunk(odd_board, even_board, tl, br, 1);
-                    };
-
-                    tids.push_back(thread(chunk_func, top_lefts[i][j], bottom_rights[i][j]));
-                }
+        for(int i=0; i<num_threads; i++){
+            if(iter % 2 == 0){
+                auto chunk_func = [&even_board, &odd_board](int first_row, int last_row) {
+                    return compute_chunk(even_board, odd_board, first_row, last_row);
+                };
+                tids.push_back(thread(chunk_func, ranges[i].first, ranges[i].second));
+            } else {
+                auto chunk_func = [&odd_board, &even_board](int first_row, int last_row) {
+                    return compute_chunk(even_board, odd_board, first_row, last_row);
+                };
+                tids.push_back(thread(chunk_func, ranges[i].first, ranges[i].second));
             }
+            
         }
         for(thread& t: tids) t.join();
     }
@@ -109,14 +89,14 @@ pair<vector<vector<int>>, double> run_in_parallel(vector<vector<int>> init_board
 }
 
 
-pair<vector<vector<int>>, double> run_in_parallel_ff(vector<vector<int>> init_board, int num_row_threads=2, \
-    int num_col_threads=2, int num_iters=100, int radius=1){
-
-    // auto start = std::chrono::system_clock::now();
+pair<vector<vector<int>>, double> run_in_parallel_ff(vector<vector<int>> init_board, int num_threads=2, \
+    int num_iters=100, int radius=1, bool verbose=false){
 
     pair<int, int> size(init_board.size(), init_board[0].size());
     vector<vector<int>> even_board = init_board;
     vector<vector<int>> odd_board = init_board;
+
+    auto init_start = std::chrono::system_clock::now();
 
     ParallelFor pf;
 
@@ -130,13 +110,20 @@ pair<vector<vector<int>>, double> run_in_parallel_ff(vector<vector<int>> init_bo
                     even_board[i][j] = rules_func(extract_matrix(odd_board, make_pair(i, j), radius));
                 }
             }
-        }, num_row_threads * num_col_threads);
+        }, num_threads);
     }
 
     // auto elapsed = std::chrono::system_clock::now() - start;
     // double duration = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
 
     ffTime(STOP_TIME);
+
+
+    auto init_elapsed = chrono::system_clock::now() - init_start;
+    double init_duration = chrono::duration_cast<std::chrono::microseconds>(init_elapsed).count();
+
+    if(verbose == true) cout <<"\nFastFlow Parallel For instantiation took: "<<init_duration <<" microseconds\n";
+
 
     double duration = ffTime(GET_TIME) * 1000;  // Couldn't find anything in FastFlow to report time in usec.
 

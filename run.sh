@@ -9,7 +9,7 @@ echo "Board Width, Board Height, N. Row Threads, N. Col Threads, N. Iters, Seq T
 for l in ${LEN[@]}; do
     for nw in ${N_THR[@]}; do
         for itr in ${N_ITR[@]}; do
-            ./ca -w $l -h $l -i $itr -r $nw -c 1 -I 5 --rand >> $1
+            ./ca -w $l -h $l -i $itr -t $nw -I 5 --rand >> $1
         done
     done
 done
