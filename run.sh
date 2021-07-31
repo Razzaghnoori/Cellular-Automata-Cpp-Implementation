@@ -1,6 +1,6 @@
 #! /bin/bash
 
-LEN=(100 300 1000)
+LEN=(128 512 2048)
 N_THR=(2 4 8 16 32 64 128)
 N_ITR=(5)
 
@@ -9,7 +9,7 @@ echo "Board Width, Board Height, N. Row Threads, N. Col Threads, N. Iters, Seq T
 for l in ${LEN[@]}; do
     for nw in ${N_THR[@]}; do
         for itr in ${N_ITR[@]}; do
-            ./ca -w $l -h $l -i $itr -t $nw -I 5 --rand >> $1
+            ./ca -w $l -h 200 -i $itr -t $nw -I $N_ITR --rand -s 2 >> $1
         done
     done
 done
