@@ -33,7 +33,10 @@ int interactive_main()
         cout << "Matrix filled with random values!\n";
     }
 
-    int num_row_threads, num_iters;
+    int num_threads, num_iters;
+
+    cout<<"How many workers should I call for?";
+    cin>>num_threads;
 
     cout << "How many iteration should it run for?\n> ";
     cin >> num_iters;
@@ -43,8 +46,8 @@ int interactive_main()
     cin >> verbose;
 
     auto seq_result = run_sequentially(board, num_iters, 1);
-    auto par_result = run_in_parallel(board, num_row_threads, num_iters);
-    auto ff_par_result = run_in_parallel_ff(board, num_row_threads, num_iters);
+    auto par_result = run_in_parallel(board, num_threads, num_iters);
+    auto ff_par_result = run_in_parallel_ff(board, num_threads, num_iters);
 
     cout << "\nParallel and sequential outputs are " << (check_matrix_equality(seq_result.first, par_result.first) ? "" : "NOT ") << "equal.\n";
     cout << "\nParallel outputs using native c++ threads and FastFlow are " << (check_matrix_equality(par_result.first, ff_par_result.first) ? "" : "NOT ") << "equal.\n";
@@ -72,12 +75,12 @@ int interactive_main()
     return (0);
 }
 
-void get_shell_params(int argc, char *argv[], int &board_w, int &board_h, int &num_row_threads, \
+void get_shell_params(int argc, char *argv[], int &board_w, int &board_h, int &num_threads, \
     int &num_iters, int &num_repetitions, int &num_states, bool &fill_randomly, bool &verbose){
     for(int i=0; i<argc; i++){
         if(strcmp(argv[i], "-w") == 0) board_w = atoi(argv[i+1]);
         if(strcmp(argv[i], "-h") == 0) board_h = atoi(argv[i+1]);
-        if(strcmp(argv[i], "-t") == 0) num_row_threads = atoi(argv[i+1]);
+        if(strcmp(argv[i], "-t") == 0) num_threads = atoi(argv[i+1]);
         if(strcmp(argv[i], "-i") == 0) num_iters = atoi(argv[i+1]);
         if(strcmp(argv[i], "-I") == 0) num_repetitions = atoi(argv[i+1]);
         if(strcmp(argv[i], "-s") == 0) num_states = atoi(argv[i+1]);
@@ -88,11 +91,11 @@ void get_shell_params(int argc, char *argv[], int &board_w, int &board_h, int &n
 
 
 int cli_main(int argc, char *argv[]){
-    int board_w, board_h, num_row_threads, num_iters, num_states;
+    int board_w, board_h, num_threads, num_iters, num_states;
     int num_reps=1;
     bool fill_rand = false, verbose=false;
 
-    get_shell_params(argc, argv, board_w, board_h, num_row_threads, \
+    get_shell_params(argc, argv, board_w, board_h, num_threads, \
         num_iters, num_reps, num_states, fill_rand, verbose);
 
     vector<vector<int>> board(board_w, vector<int>(board_h));
@@ -110,8 +113,8 @@ int cli_main(int argc, char *argv[]){
 
     for(int rep=0; rep<num_reps; rep++){
         auto seq_result = run_sequentially(board, num_iters, 1, verbose);
-        auto par_result = run_in_parallel(board, num_row_threads, num_iters, 1, verbose);
-        auto ff_par_result = run_in_parallel_ff(board, num_row_threads, num_iters, 1, verbose);
+        auto par_result = run_in_parallel(board, num_threads, num_iters, 1, verbose);
+        auto ff_par_result = run_in_parallel_ff(board, num_threads, num_iters, 1, verbose);
 
         // We need two extra results to compute scalability.
         auto par_1_result = run_in_parallel(board, 1, num_iters, 1, verbose);
@@ -138,10 +141,10 @@ int cli_main(int argc, char *argv[]){
     float sc_par = par_1_time / par_time;
     float sc_ff = ff_par_1_time / ff_par_time;
 
-    float eff_par = sp_par / num_row_threads;
-    float eff_ff = sp_ff / num_row_threads;
+    float eff_par = sp_par / num_threads;
+    float eff_ff = sp_ff / num_threads;
 
-    long csv_row_setup[] = {board_w, board_h, num_row_threads, num_iters, seq_time, par_time, ff_par_time};
+    long csv_row_setup[] = {board_w, board_h, num_threads, num_iters, seq_time, par_time, ff_par_time};
     float csv_row_results[] = {sp_par, sp_ff, sc_par, sc_ff, eff_par, eff_ff};
     int row_setup_len = sizeof(csv_row_setup)/sizeof(csv_row_setup[0]);
     int row_result_len = sizeof(csv_row_results)/sizeof(csv_row_results[0]);
